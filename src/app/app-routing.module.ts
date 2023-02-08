@@ -6,7 +6,7 @@ import { ConfigurationComponent } from './configuration/configuration.component'
 
 const routes: Routes = [
   {
-    path: 'wellnness',
+    path: 'wellness',
     component: WellnessFormComponent,
     canActivate: [CanActivateWelnessFormRouteGuard]
   },
@@ -16,7 +16,7 @@ const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: '/wellnness',
+    redirectTo: '/wellness',
     pathMatch: 'full'
   }
 ];
