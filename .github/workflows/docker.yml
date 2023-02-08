@@ -9,7 +9,7 @@ on:
       - v*
 
 env:
-  IMAGE_NAME: gif-collection-bot
+  IMAGE_NAME: intervals-wellness
 
 jobs:
   push:
