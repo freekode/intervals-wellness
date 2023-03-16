@@ -57,6 +57,13 @@
     </mat-card-content>
     <mat-card-actions>
       <button mat-raised-button color="primary" [disabled]="wellnessForm.invalid" type="submit">Submit</button>
+      <mat-spinner 
+        *ngIf="sendingInProgress"
+        [diameter]="36"
+        style="margin-left: 10px;"
+      ></mat-spinner>
+      <!-- <mat-icon fontIcon="check_circle" style="color:green"></mat-icon> -->
+      <!-- <mat-icon fontIcon="error" style="color:red"></mat-icon> -->
     </mat-card-actions>
   </mat-card>
 </form>

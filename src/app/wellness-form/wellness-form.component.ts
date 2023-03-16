@@ -22,6 +22,8 @@ export class WellnessFormComponent implements OnInit {
 
   configurationData = this.configurationService.getConfiguration()
 
+  sendingInProgress = false
+
   constructor(
     private formBuilder: FormBuilder,
     private intervalsClient: IntervalsClient,
@@ -41,13 +43,16 @@ export class WellnessFormComponent implements OnInit {
 
 
   onSubmit(): void {
-    let date = this.getDate(this.wellnessForm)
+    this.sendingInProgress = true
+    let date = this.wellnessForm.value.date
     let values = this.getWellnessValues(date, this.wellnessForm)
 
     console.log(values)
 
     this.intervalsClient.updateWellness(this.configurationData.athleteId!, date, values).subscribe(() => {
       console.log('done')
+      this.sendingInProgress = false
+      
     })
   }
 

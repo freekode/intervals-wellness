@@ -15,7 +15,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
+
 
 import { IntervalsAuthInterceptor } from 'infrastructure/intervals-auth.interceptor';
 
@@ -59,7 +61,8 @@ export const MY_FORMATS = {
     MatRadioModule,
     MatCardModule,
     MatDatepickerModule,
-    MatDialogModule
+    MatProgressSpinnerModule,
+    MatIconModule
   ],
   providers: [
     {
