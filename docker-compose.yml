@@ -1,0 +1,8 @@
+version: '3.1'
+
+services:
+  app:
+    image: ghcr.io/freekode/intervals-wellness/intervals-wellness:latest
+    restart: unless-stopped
+    ports:
+      - '1890:80'
