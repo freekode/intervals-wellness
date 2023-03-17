@@ -1,6 +1,6 @@
 # intervals-wellness
 
-Small form for easier wellness input on Intervals.icu platform
+Small form for easier wellness form on Intervals.icu platform
 
 ## TODO
 
