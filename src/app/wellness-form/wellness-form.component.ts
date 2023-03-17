@@ -19,7 +19,7 @@ const KNOWN_FORM_CONTROLS = [
 @Component({
   selector: 'app-wellness-form',
   templateUrl: './wellness-form.component.html',
-  styleUrls: ['./wellness-form.component.scss']
+  styleUrls: ['./wellness-form.component.scss'],
 })
 export class WellnessFormComponent implements OnInit {
 
@@ -30,6 +30,8 @@ export class WellnessFormComponent implements OnInit {
   configurationData!: ConfigurationData;
 
   sendingInProgress = false;
+  requestSuccessful = false;
+  requestError = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -49,6 +51,9 @@ export class WellnessFormComponent implements OnInit {
   }
 
   onSubmit(): void {
+    if (this.wellnessForm.pristine) {
+      return;
+    }
     this.sendingInProgress = true;
     let values = this.getWellnessFormValues(this.wellnessForm);
 
@@ -57,6 +62,7 @@ export class WellnessFormComponent implements OnInit {
     this.intervalsClient.updateWellness(this.configurationData.athleteId!, values.id, values).subscribe(() => {
       console.log('done');
       this.sendingInProgress = false;
+      this.showSuccessfulIcon();
     });
   }
 
@@ -113,5 +119,12 @@ export class WellnessFormComponent implements OnInit {
     });
 
     return this.formBuilder.group(wellnessFormFields);
+  }
+
+  private showSuccessfulIcon() {
+    this.requestSuccessful = true;
+    setTimeout(() => {
+      this.requestSuccessful = false;
+    }, 3000);
   }
 }

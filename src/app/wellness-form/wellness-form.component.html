@@ -41,14 +41,26 @@
         color="primary"
         [disabled]="wellnessForm.invalid"
         type="submit">
-        Submit
+        Send
       </button>
-      <mat-spinner
-        *ngIf="sendingInProgress"
-        [diameter]="36"
-        style="margin-left: 10px;"></mat-spinner>
-      <!-- <mat-icon fontIcon="check_circle" style="color:green"></mat-icon> -->
-      <!-- <mat-icon fontIcon="error" style="color:red"></mat-icon> -->
+      <div class="status-section">
+        <mat-spinner
+          *ngIf="sendingInProgress"
+          [diameter]="36"
+        ></mat-spinner>
+        <mat-icon
+          class="successful-icon"
+          [class.puff-out-center]="requestSuccessful"
+        >
+          check_circle
+        </mat-icon>
+        <mat-icon
+          class="error-icon"
+          [class.puff-out-center]="requestError"
+        >
+          error
+        </mat-icon>
+      </div>
     </mat-card-actions>
   </mat-card>
 </form>
