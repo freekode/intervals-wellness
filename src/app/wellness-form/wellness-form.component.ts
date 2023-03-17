@@ -83,7 +83,7 @@ export class WellnessFormComponent implements OnInit {
     Object.keys(form.controls).forEach(controlName => {
       let control = form.controls[controlName];
       if (control.dirty) {
-        values[controlName] = control.value === null ? -1 : control.value;
+        values[controlName] = this.parseFormValue(control.value, controlName);
       }
     });
     return values;
@@ -96,8 +96,8 @@ export class WellnessFormComponent implements OnInit {
         id: response.id
       };
 
-      this.wellnessFields.forEach((key: any) => {
-        newValues[key.controlName] = response[key.controlName];
+      Object.keys(this.formGroup.controls).forEach(controlName => {
+        newValues[controlName] = response[controlName];
       });
 
       this.formGroup.setValue(newValues, {emitEvent: false});
@@ -119,6 +119,18 @@ export class WellnessFormComponent implements OnInit {
     });
 
     return this.formBuilder.group(wellnessFormFields);
+  }
+
+  private parseFormValue(value: any, controlName: string) {
+    let wellnessField = this.wellnessFields.find(elem => elem.controlName === controlName);
+    if (wellnessField.type === 'number') {
+      if (value === null) {
+        value = -1;
+      } else {
+        value = (value + '').replace(',', '.');
+      }
+    }
+    return value;
   }
 
   private showSuccessfulIcon() {

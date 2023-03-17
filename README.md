@@ -6,4 +6,4 @@ Small form for easier wellness input on Intervals.icu platform
 
 * [x] get selected fields from Intervals
 * [x] handle 403 errors
-* [ ] show success or error icons on sent
+* [x] show success or error icons on sent
