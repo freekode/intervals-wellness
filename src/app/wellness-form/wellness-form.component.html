@@ -1,4 +1,7 @@
-<form [formGroup]="wellnessForm" novalidate (ngSubmit)="onSubmit()">
+<form
+  [formGroup]="wellnessForm"
+  novalidate
+  (ngSubmit)="onSubmit()">
   <mat-card class="shipping-card">
     <mat-card-header>
       <mat-card-title>Wellness</mat-card-title>
@@ -8,16 +11,36 @@
         <div class="col">
           <mat-form-field appearance="fill">
             <mat-label>Choose a date</mat-label>
-            <input matInput [matDatepicker]="datepicker"  formControlName="date">
-            <mat-datepicker-toggle matIconSuffix [for]="datepicker"></mat-datepicker-toggle>
+            <input
+              matInput
+              [matDatepicker]="datepicker"
+              formControlName="date">
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="datepicker"></mat-datepicker-toggle>
             <mat-datepicker #datepicker></mat-datepicker>
-          </mat-form-field>          
+          </mat-form-field>
         </div>
       </div>
+      <div class="row" *ngFor="let control of formControls">
+        <div class="col">
+          <app-form-input
+            [formGroup]="wellnessForm"
+            [inputType]="control.type"
+            [controlName]="control.controlName"
+          ></app-form-input>
+        </div>
+      </div>
+
       <div class="row">
         <div class="col">
           <mat-form-field class="full-width">
-            <input matInput placeholder="weight" formControlName="weight">
+            <input
+              matInput
+              type="number"
+              step="any"
+              placeholder="restingHR"
+              formControlName="restingHR">
           </mat-form-field>
         </div>
       </div>
@@ -25,7 +48,12 @@
       <div class="row">
         <div class="col">
           <mat-form-field class="full-width">
-            <input matInput placeholder="restingHR" formControlName="restingHR">
+            <input
+              matInput
+              type="number"
+              step="any"
+              placeholder="hrv"
+              formControlName="hrv">
           </mat-form-field>
         </div>
       </div>
@@ -33,7 +61,12 @@
       <div class="row">
         <div class="col">
           <mat-form-field class="full-width">
-            <input matInput placeholder="hrv" formControlName="hrv">
+            <input
+              matInput
+              type="number"
+              step="any"
+              placeholder="hrvSDNN"
+              formControlName="hrvSDNN">
           </mat-form-field>
         </div>
       </div>
@@ -41,27 +74,25 @@
       <div class="row">
         <div class="col">
           <mat-form-field class="full-width">
-            <input matInput placeholder="hrvSDNN" formControlName="hrvSDNN">
-          </mat-form-field>
-        </div>
-      </div>
-      
-      <div class="row">
-        <div class="col">
-          <mat-form-field class="full-width">
-            <textarea matInput placeholder="comments" formControlName="comments"></textarea>
+            <textarea
+              matInput
+              placeholder="comments"
+              formControlName="comments"></textarea>
           </mat-form-field>
         </div>
       </div>
 
     </mat-card-content>
     <mat-card-actions>
-      <button mat-raised-button color="primary" [disabled]="wellnessForm.invalid" type="submit">Submit</button>
-      <mat-spinner 
+      <button
+        mat-raised-button
+        color="primary"
+        [disabled]="wellnessForm.invalid"
+        type="submit">Submit</button>
+      <mat-spinner
         *ngIf="sendingInProgress"
         [diameter]="36"
-        style="margin-left: 10px;"
-      ></mat-spinner>
+        style="margin-left: 10px;"></mat-spinner>
       <!-- <mat-icon fontIcon="check_circle" style="color:green"></mat-icon> -->
       <!-- <mat-icon fontIcon="error" style="color:red"></mat-icon> -->
     </mat-card-actions>

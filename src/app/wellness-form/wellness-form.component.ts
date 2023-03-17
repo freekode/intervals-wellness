@@ -7,7 +7,7 @@ import { ConfigurationData } from 'infrastructure/configuration-data';
 
 
 const DATE_FORMAT = 'YYYY-MM-DD'
-const WELLNESS_KEYS = ['weight', 'restingHR', 'hrv', 'hrvSDNN', 'comments']
+const TODAY_DATE = moment()
 
 @Component({
   selector: 'app-wellness-form',
@@ -15,12 +15,18 @@ const WELLNESS_KEYS = ['weight', 'restingHR', 'hrv', 'hrvSDNN', 'comments']
   styleUrls: ['./wellness-form.component.scss']
 })
 export class WellnessFormComponent implements OnInit {
-  
-  todayDate = moment()
 
   wellnessForm: FormGroup = this.getWellnessForm()
 
   configurationData = this.configurationService.getConfiguration()
+
+  formControls = [
+    { controlName: 'weight', type: 'number' },
+    { controlName: 'restingHR', type: 'number' },
+    { controlName: 'hrv', type: 'number' },
+    { controlName: 'hrvSDNN', type: 'number' },
+    { controlName: 'comments', type: 'textarea' }
+  ]
 
   sendingInProgress = false
 
@@ -37,7 +43,7 @@ export class WellnessFormComponent implements OnInit {
     })
 
     this.wellnessForm.patchValue({
-      date: this.todayDate,
+      date: TODAY_DATE,
     })
   }
 
@@ -52,7 +58,6 @@ export class WellnessFormComponent implements OnInit {
     this.intervalsClient.updateWellness(this.configurationData.athleteId!, date, values).subscribe(() => {
       console.log('done')
       this.sendingInProgress = false
-      
     })
   }
 
@@ -62,11 +67,11 @@ export class WellnessFormComponent implements OnInit {
         date: response.id
       };
 
-      WELLNESS_KEYS.forEach(key => {
-        newValues[key] = response[key];
+      this.formControls.forEach(key => {
+        newValues[key.controlName] = response[key.controlName];
       });
 
-      this.wellnessForm.setValue(newValues, {emitEvent: false});
+      this.wellnessForm.setValue(newValues, { emitEvent: false });
     })
   }
 
@@ -75,8 +80,8 @@ export class WellnessFormComponent implements OnInit {
       id: date
     }
 
-    WELLNESS_KEYS.forEach(key => {
-      values[key] = form.value[key];
+    this.formControls.forEach(key => {
+      values[key.controlName] = form.value[key.controlName];
     });
     return values
   }
@@ -85,14 +90,10 @@ export class WellnessFormComponent implements OnInit {
     let wellnessFormFields: any = {
       date: [null, Validators.required],
     };
-    WELLNESS_KEYS.forEach(key => {
-      wellnessFormFields[key] = null;
+    this.formControls.forEach(key => {
+      wellnessFormFields[key.controlName] = null;
     });
 
     return this.formBuilder.group(wellnessFormFields);
-  }
-
-  private getDate(form: FormGroup) {
-    return form.value.date.format(DATE_FORMAT)
   }
 }

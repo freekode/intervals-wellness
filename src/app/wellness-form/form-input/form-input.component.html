@@ -1,0 +1,16 @@
+<mat-form-field [formGroup]="formGroup">
+    <input
+      *ngIf="inputType === 'number'"
+      matInput
+      type="number"
+      inputmode="decimal"
+      [formControlName]="controlName"
+      [placeholder]="placeholder">
+
+    <textarea
+      *ngIf="inputType === 'textarea'"
+      matInput
+      [formControlName]="controlName"
+      [placeholder]="placeholder"
+    ></textarea>
+</mat-form-field>

@@ -24,6 +24,7 @@ import { IntervalsAuthInterceptor } from 'infrastructure/intervals-auth.intercep
 import { AppComponent } from './app.component';
 import { WellnessFormComponent } from './wellness-form/wellness-form.component';
 import { ConfigurationComponent } from './configuration/configuration.component';
+import { FormInputComponent } from './wellness-form/form-input/form-input.component';
 
 
 export const MY_FORMATS = {
@@ -43,7 +44,8 @@ export const MY_FORMATS = {
   declarations: [
     AppComponent,
     WellnessFormComponent,
-    ConfigurationComponent
+    ConfigurationComponent,
+    FormInputComponent
   ],
   imports: [
     BrowserModule,
