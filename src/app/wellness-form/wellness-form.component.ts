@@ -41,7 +41,7 @@ export class WellnessFormComponent implements OnInit {
     this.configurationData = this.configurationService.getConfiguration()
     this.wellnessForm = this.getWellnessForm()
     this.wellnessForm.controls['date'].valueChanges.subscribe(date => {
-      this.updateWellnessForm(date);
+      this.setWellnessFormValues(date);
     });
 
     this.wellnessForm.patchValue({
@@ -63,7 +63,21 @@ export class WellnessFormComponent implements OnInit {
     });
   }
 
-  private updateWellnessForm(date: any) {
+  private getWellnessValues(date: string, form: FormGroup): any {
+    let values: any = {
+      id: date
+    };
+
+    Object.keys(form.controls).forEach(controlName => {
+      let control = form.controls[controlName]
+      if (control.dirty) {
+        values[controlName] = control.value === null ? -1 : control.value
+      }
+    })
+    return values;
+  }
+
+  private setWellnessFormValues(date: any) {
     this.intervalsClient.getWellness(this.configurationData.athleteId!, date.format(DATE_FORMAT)).subscribe((response) => {
       let newValues: any = {
         date: response.id
@@ -75,17 +89,6 @@ export class WellnessFormComponent implements OnInit {
 
       this.wellnessForm.setValue(newValues, {emitEvent: false});
     });
-  }
-
-  private getWellnessValues(date: string, form: FormGroup): any {
-    let values: any = {
-      id: date
-    };
-
-    this.formControls.forEach(key => {
-      values[key.controlName] = form.value[key.controlName];
-    });
-    return values;
   }
 
   private getWellnessForm(): FormGroup {
