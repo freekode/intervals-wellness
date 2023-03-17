@@ -8,6 +8,13 @@ import { ConfigurationData } from '../../infrastructure/configuration-data';
 
 const DATE_FORMAT = 'YYYY-MM-DD';
 const TODAY_DATE = moment();
+const KNOWN_FORM_CONTROLS = [
+  {controlName: 'weight', type: 'number'},
+  {controlName: 'restingHR', type: 'number'},
+  {controlName: 'hrv', type: 'number'},
+  {controlName: 'hrvSDNN', type: 'number'},
+  {controlName: 'comments', type: 'textarea'}
+];
 
 @Component({
   selector: 'app-wellness-form',
@@ -16,13 +23,7 @@ const TODAY_DATE = moment();
 })
 export class WellnessFormComponent implements OnInit {
 
-  formControls = [
-    {controlName: 'weight', type: 'number'},
-    {controlName: 'restingHR', type: 'number'},
-    {controlName: 'hrv', type: 'number'},
-    {controlName: 'hrvSDNN', type: 'number'},
-    {controlName: 'comments', type: 'textarea'}
-  ];
+  formControls!: Array<any>;
 
   wellnessForm!: FormGroup;
 
@@ -38,64 +39,76 @@ export class WellnessFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.configurationData = this.configurationService.getConfiguration()
-    this.wellnessForm = this.getWellnessForm()
-    this.wellnessForm.controls['date'].valueChanges.subscribe(date => {
-      this.setWellnessFormValues(date);
-    });
+    this.configurationData = this.configurationService.getConfiguration();
+    this.intervalsClient.getAthlete(this.configurationData.athleteId!).subscribe(response => {
+      this.formControls = this.getWellnessControls(response);
+      this.wellnessForm = this.getWellnessFormGroup(this.formControls);
 
-    this.wellnessForm.patchValue({
-      date: TODAY_DATE,
+      this.handleDateChange();
     });
   }
 
-
   onSubmit(): void {
     this.sendingInProgress = true;
-    let date = this.wellnessForm.value.date;
-    let values = this.getWellnessValues(date, this.wellnessForm);
+    let values = this.getWellnessFormValues(this.wellnessForm);
 
     console.log(values);
 
-    this.intervalsClient.updateWellness(this.configurationData.athleteId!, date, values).subscribe(() => {
+    this.intervalsClient.updateWellness(this.configurationData.athleteId!, values.id, values).subscribe(() => {
       console.log('done');
       this.sendingInProgress = false;
     });
   }
 
-  private getWellnessValues(date: string, form: FormGroup): any {
+  private handleDateChange() {
+    this.wellnessForm.controls['id'].valueChanges.subscribe(date => {
+      this.setWellnessFormValues(date);
+    });
+    this.wellnessForm.patchValue({
+      id: TODAY_DATE,
+    });
+  }
+
+  private getWellnessFormValues(form: FormGroup): any {
     let values: any = {
-      id: date
+      id: form.controls['id'].value
     };
 
     Object.keys(form.controls).forEach(controlName => {
-      let control = form.controls[controlName]
+      let control = form.controls[controlName];
       if (control.dirty) {
-        values[controlName] = control.value === null ? -1 : control.value
+        values[controlName] = control.value === null ? -1 : control.value;
       }
-    })
+    });
     return values;
   }
 
   private setWellnessFormValues(date: any) {
+    this.sendingInProgress = true;
     this.intervalsClient.getWellness(this.configurationData.athleteId!, date.format(DATE_FORMAT)).subscribe((response) => {
       let newValues: any = {
-        date: response.id
+        id: response.id
       };
 
-      this.formControls.forEach(key => {
+      this.formControls.forEach((key: any) => {
         newValues[key.controlName] = response[key.controlName];
       });
 
       this.wellnessForm.setValue(newValues, {emitEvent: false});
+      this.sendingInProgress = false;
     });
   }
 
-  private getWellnessForm(): FormGroup {
+  private getWellnessControls(response: any) {
+    let wellnessKeys = response['icu_wellness_keys'] as Array<string>;
+    return KNOWN_FORM_CONTROLS.filter(elem => wellnessKeys.indexOf(elem.controlName) > -1);
+  }
+
+  private getWellnessFormGroup(wellnessFormControls: any): FormGroup {
     let wellnessFormFields: any = {
-      date: [null, Validators.required],
+      id: [null, Validators.required],
     };
-    this.formControls.forEach(key => {
+    wellnessFormControls.forEach((key: any) => {
       wellnessFormFields[key.controlName] = null;
     });
 

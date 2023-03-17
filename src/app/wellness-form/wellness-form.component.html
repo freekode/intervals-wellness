@@ -1,4 +1,5 @@
 <form
+  *ngIf="wellnessForm!!"
   [formGroup]="wellnessForm"
   novalidate
   (ngSubmit)="onSubmit()">
@@ -14,7 +15,7 @@
             <input
               matInput
               [matDatepicker]="datepicker"
-              formControlName="date">
+              formControlName="id">
             <mat-datepicker-toggle
               matIconSuffix
               [for]="datepicker"
