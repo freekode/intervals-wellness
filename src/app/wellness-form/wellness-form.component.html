@@ -17,7 +17,8 @@
               formControlName="date">
             <mat-datepicker-toggle
               matIconSuffix
-              [for]="datepicker"></mat-datepicker-toggle>
+              [for]="datepicker"
+            ></mat-datepicker-toggle>
             <mat-datepicker #datepicker></mat-datepicker>
           </mat-form-field>
         </div>
@@ -28,67 +29,19 @@
             [formGroup]="wellnessForm"
             [inputType]="control.type"
             [controlName]="control.controlName"
+            [placeholder]="control.controlName"
           ></app-form-input>
         </div>
       </div>
-
-      <div class="row">
-        <div class="col">
-          <mat-form-field class="full-width">
-            <input
-              matInput
-              type="number"
-              step="any"
-              placeholder="restingHR"
-              formControlName="restingHR">
-          </mat-form-field>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col">
-          <mat-form-field class="full-width">
-            <input
-              matInput
-              type="number"
-              step="any"
-              placeholder="hrv"
-              formControlName="hrv">
-          </mat-form-field>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col">
-          <mat-form-field class="full-width">
-            <input
-              matInput
-              type="number"
-              step="any"
-              placeholder="hrvSDNN"
-              formControlName="hrvSDNN">
-          </mat-form-field>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col">
-          <mat-form-field class="full-width">
-            <textarea
-              matInput
-              placeholder="comments"
-              formControlName="comments"></textarea>
-          </mat-form-field>
-        </div>
-      </div>
-
     </mat-card-content>
     <mat-card-actions>
       <button
         mat-raised-button
         color="primary"
         [disabled]="wellnessForm.invalid"
-        type="submit">Submit</button>
+        type="submit">
+        Submit
+      </button>
       <mat-spinner
         *ngIf="sendingInProgress"
         [diameter]="36"

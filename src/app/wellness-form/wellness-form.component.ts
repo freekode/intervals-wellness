@@ -3,11 +3,10 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IntervalsClient } from 'infrastructure/intervals.client';
 import * as moment from 'moment';
 import { ConfigurationService } from 'infrastructure/configuration.service';
-import { ConfigurationData } from 'infrastructure/configuration-data';
 
 
-const DATE_FORMAT = 'YYYY-MM-DD'
-const TODAY_DATE = moment()
+const DATE_FORMAT = 'YYYY-MM-DD';
+const TODAY_DATE = moment();
 
 @Component({
   selector: 'app-wellness-form',
@@ -16,19 +15,19 @@ const TODAY_DATE = moment()
 })
 export class WellnessFormComponent implements OnInit {
 
-  wellnessForm: FormGroup = this.getWellnessForm()
+  wellnessForm!: FormGroup;
 
-  configurationData = this.configurationService.getConfiguration()
+  configurationData = this.configurationService.getConfiguration();
 
   formControls = [
-    { controlName: 'weight', type: 'number' },
-    { controlName: 'restingHR', type: 'number' },
-    { controlName: 'hrv', type: 'number' },
-    { controlName: 'hrvSDNN', type: 'number' },
-    { controlName: 'comments', type: 'textarea' }
-  ]
+    {controlName: 'weight', type: 'number'},
+    {controlName: 'restingHR', type: 'number'},
+    {controlName: 'hrv', type: 'number'},
+    {controlName: 'hrvSDNN', type: 'number'},
+    {controlName: 'comments', type: 'textarea'}
+  ];
 
-  sendingInProgress = false
+  sendingInProgress = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -38,27 +37,28 @@ export class WellnessFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.wellnessForm = this.getWellnessForm()
     this.wellnessForm.controls['date'].valueChanges.subscribe(date => {
       this.updateWellnessForm(date);
-    })
+    });
 
     this.wellnessForm.patchValue({
       date: TODAY_DATE,
-    })
+    });
   }
 
 
   onSubmit(): void {
-    this.sendingInProgress = true
-    let date = this.wellnessForm.value.date
-    let values = this.getWellnessValues(date, this.wellnessForm)
+    this.sendingInProgress = true;
+    let date = this.wellnessForm.value.date;
+    let values = this.getWellnessValues(date, this.wellnessForm);
 
-    console.log(values)
+    console.log(values);
 
     this.intervalsClient.updateWellness(this.configurationData.athleteId!, date, values).subscribe(() => {
-      console.log('done')
-      this.sendingInProgress = false
-    })
+      console.log('done');
+      this.sendingInProgress = false;
+    });
   }
 
   private updateWellnessForm(date: any) {
@@ -71,19 +71,19 @@ export class WellnessFormComponent implements OnInit {
         newValues[key.controlName] = response[key.controlName];
       });
 
-      this.wellnessForm.setValue(newValues, { emitEvent: false });
-    })
+      this.wellnessForm.setValue(newValues, {emitEvent: false});
+    });
   }
 
   private getWellnessValues(date: string, form: FormGroup): any {
     let values: any = {
       id: date
-    }
+    };
 
     this.formControls.forEach(key => {
       values[key.controlName] = form.value[key.controlName];
     });
-    return values
+    return values;
   }
 
   private getWellnessForm(): FormGroup {
