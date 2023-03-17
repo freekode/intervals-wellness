@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IntervalsClient } from 'infrastructure/intervals.client';
 import * as moment from 'moment';
 import { ConfigurationService } from 'infrastructure/configuration.service';
+import { ConfigurationData } from '../../infrastructure/configuration-data';
 
 
 const DATE_FORMAT = 'YYYY-MM-DD';
@@ -15,10 +16,6 @@ const TODAY_DATE = moment();
 })
 export class WellnessFormComponent implements OnInit {
 
-  wellnessForm!: FormGroup;
-
-  configurationData = this.configurationService.getConfiguration();
-
   formControls = [
     {controlName: 'weight', type: 'number'},
     {controlName: 'restingHR', type: 'number'},
@@ -26,6 +23,10 @@ export class WellnessFormComponent implements OnInit {
     {controlName: 'hrvSDNN', type: 'number'},
     {controlName: 'comments', type: 'textarea'}
   ];
+
+  wellnessForm!: FormGroup;
+
+  configurationData!: ConfigurationData;
 
   sendingInProgress = false;
 
@@ -37,6 +38,7 @@ export class WellnessFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.configurationData = this.configurationService.getConfiguration()
     this.wellnessForm = this.getWellnessForm()
     this.wellnessForm.controls['date'].valueChanges.subscribe(date => {
       this.updateWellnessForm(date);

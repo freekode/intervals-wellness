@@ -1,4 +1,4 @@
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
@@ -13,18 +13,17 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
+import { MAT_MOMENT_DATE_ADAPTER_OPTIONS, MomentDateAdapter } from '@angular/material-moment-adapter';
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-
+import { MatToolbarModule } from '@angular/material/toolbar';
 
 import { IntervalsAuthInterceptor } from 'infrastructure/intervals-auth.interceptor';
-
-import { AppComponent } from './app.component';
-import { WellnessFormComponent } from './wellness-form/wellness-form.component';
-import { ConfigurationComponent } from './configuration/configuration.component';
-import { FormInputComponent } from './wellness-form/form-input/form-input.component';
+import { AppComponent } from 'app/app.component';
+import { WellnessFormComponent } from 'app/wellness-form/wellness-form.component';
+import { ConfigurationComponent } from 'app/configuration/configuration.component';
+import { FormInputComponent } from 'app/wellness-form/form-input/form-input.component';
 
 
 export const MY_FORMATS = {
@@ -64,7 +63,8 @@ export const MY_FORMATS = {
     MatCardModule,
     MatDatepickerModule,
     MatProgressSpinnerModule,
-    MatIconModule
+    MatIconModule,
+    MatToolbarModule
   ],
   providers: [
     {
@@ -84,4 +84,5 @@ export const MY_FORMATS = {
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}
