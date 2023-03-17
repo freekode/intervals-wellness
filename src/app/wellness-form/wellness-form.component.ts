@@ -125,6 +125,6 @@ export class WellnessFormComponent implements OnInit {
     this.requestSuccessful = true;
     setTimeout(() => {
       this.requestSuccessful = false;
-    }, 3000);
+    }, 5000);
   }
 }
