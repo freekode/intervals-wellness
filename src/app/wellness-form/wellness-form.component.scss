@@ -10,3 +10,45 @@
 .col {
   flex: 1;
 }
+
+.submit-button{
+  height: 70px;
+  width: 70px;
+}
+
+.status-section {
+  margin-left: 10px;
+
+  .spinner {
+    display: inline-flex;
+    visibility: visible;
+  }
+
+  .successful-icon {
+    color: green;
+    visibility: hidden;
+  }
+
+  .error-icon {
+    color: red;
+    visibility: hidden;
+  }
+}
+
+.puff-out-center {
+  visibility: visible !important;
+  animation: puff-out-center 4s cubic-bezier(0.165, 0.840, 0.440, 1.000) both;
+}
+
+@keyframes puff-out-center {
+  75% {
+    transform: scale(1);
+    filter: blur(0px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    filter: blur(4px);
+    opacity: 0;
+  }
+}

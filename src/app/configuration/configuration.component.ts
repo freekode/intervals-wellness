@@ -1,8 +1,10 @@
-import { Component, Inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ConfigurationService } from 'infrastructure/configuration.service';
 import { ConfigurationData } from 'infrastructure/configuration-data';
 import { Router } from '@angular/router';
+import { IntervalsClient } from 'infrastructure/intervals.client';
+import { catchError, EMPTY } from 'rxjs';
 
 
 @Component({
@@ -10,34 +12,47 @@ import { Router } from '@angular/router';
   templateUrl: './configuration.component.html',
   styleUrls: ['./configuration.component.scss']
 })
-export class ConfigurationComponent {
-  configurationForm: FormGroup = this.getConfigurationForm()
+export class ConfigurationComponent implements OnInit {
+
+  formGroup: FormGroup = this.getConfigurationForm();
+
+  errorMessage = '';
 
   constructor(
     private router: Router,
     private formBuilder: FormBuilder,
-    private configurationService: ConfigurationService
+    private configurationService: ConfigurationService,
+    private intervalsClient: IntervalsClient,
   ) {
   }
 
   ngOnInit(): void {
-    let configuration = this.configurationService.getConfiguration()
+    let configuration = this.configurationService.getConfiguration();
 
-    this.configurationForm.setValue({
+    this.formGroup.setValue({
       athleteId: configuration.athleteId || null,
       apiKey: configuration.apiKey || null,
-    })
+    });
   }
-
 
   onSubmit(): void {
     let newConfiguration = new ConfigurationData(
-      this.configurationForm.value.athleteId,
-      this.configurationForm.value.apiKey
-    )
+      this.formGroup.value.athleteId,
+      this.formGroup.value.apiKey
+    );
 
-    this.configurationService.setConfiguration(newConfiguration)
-    this.router.navigate(['/wellness']);
+    this.configurationService.setConfiguration(newConfiguration);
+    this.intervalsClient.test(newConfiguration.athleteId!).pipe(
+      catchError(err => {
+        if (err.status === 403) {
+          this.errorMessage = 'Wrong credentials';
+        }
+        return EMPTY;
+      })
+    ).subscribe(() => {
+      this.errorMessage = '';
+      this.router.navigate(['/wellness']);
+    });
   }
 
   private getConfigurationForm(): FormGroup {

@@ -6,23 +6,32 @@ import { ConfigurationService } from 'infrastructure/configuration.service';
 import { ConfigurationData } from 'infrastructure/configuration-data';
 
 
-const DATE_FORMAT = 'YYYY-MM-DD'
-const WELLNESS_KEYS = ['weight', 'restingHR', 'hrv', 'hrvSDNN', 'comments']
+const DATE_FORMAT = 'YYYY-MM-DD';
+const TODAY_DATE = moment();
+const KNOWN_WELLNESS_FIELDS = [
+  {controlName: 'weight', type: 'number'},
+  {controlName: 'restingHR', type: 'number'},
+  {controlName: 'hrv', type: 'number'},
+  {controlName: 'hrvSDNN', type: 'number'},
+  {controlName: 'comments', type: 'textarea'}
+];
 
 @Component({
   selector: 'app-wellness-form',
   templateUrl: './wellness-form.component.html',
-  styleUrls: ['./wellness-form.component.scss']
+  styleUrls: ['./wellness-form.component.scss'],
 })
 export class WellnessFormComponent implements OnInit {
-  
-  todayDate = moment()
 
-  wellnessForm: FormGroup = this.getWellnessForm()
+  wellnessFields!: Array<any>;
 
-  configurationData = this.configurationService.getConfiguration()
+  formGroup!: FormGroup;
 
-  sendingInProgress = false
+  configurationData!: ConfigurationData;
+
+  sendingInProgress = false;
+  requestSuccessful = false;
+  requestError = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -32,67 +41,102 @@ export class WellnessFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.wellnessForm.controls['date'].valueChanges.subscribe(date => {
-      this.updateWellnessForm(date);
-    })
+    this.configurationData = this.configurationService.getConfiguration();
+    this.intervalsClient.getAthlete(this.configurationData.athleteId!).subscribe(response => {
+      this.wellnessFields = this.getWellnessFields(response);
+      this.formGroup = this.getWellnessFormGroup(this.wellnessFields);
 
-    this.wellnessForm.patchValue({
-      date: this.todayDate,
-    })
+      this.handleDateChange();
+    });
   }
-
 
   onSubmit(): void {
-    this.sendingInProgress = true
-    let date = this.wellnessForm.value.date
-    let values = this.getWellnessValues(date, this.wellnessForm)
+    if (this.formGroup.pristine) {
+      return;
+    }
+    this.sendingInProgress = true;
+    let values = this.getWellnessFormValues(this.formGroup);
 
-    console.log(values)
+    console.log(values);
 
-    this.intervalsClient.updateWellness(this.configurationData.athleteId!, date, values).subscribe(() => {
-      console.log('done')
-      this.sendingInProgress = false
-      
-    })
+    this.intervalsClient.updateWellness(this.configurationData.athleteId!, values.id, values).subscribe(() => {
+      console.log('done');
+      this.sendingInProgress = false;
+      this.showSuccessfulIcon();
+    });
   }
 
-  private updateWellnessForm(date: any) {
+  private handleDateChange() {
+    this.formGroup.controls['id'].valueChanges.subscribe(date => {
+      this.setWellnessFormValues(date);
+    });
+    this.formGroup.patchValue({
+      id: TODAY_DATE,
+    });
+  }
+
+  private getWellnessFormValues(form: FormGroup): any {
+    let values: any = {
+      id: form.controls['id'].value
+    };
+
+    Object.keys(form.controls).forEach(controlName => {
+      let control = form.controls[controlName];
+      if (control.dirty) {
+        values[controlName] = this.parseFormValue(control.value, controlName);
+      }
+    });
+    return values;
+  }
+
+  private setWellnessFormValues(date: any) {
+    this.sendingInProgress = true;
     this.intervalsClient.getWellness(this.configurationData.athleteId!, date.format(DATE_FORMAT)).subscribe((response) => {
       let newValues: any = {
-        date: response.id
+        id: response.id
       };
 
-      WELLNESS_KEYS.forEach(key => {
-        newValues[key] = response[key];
+      Object.keys(this.formGroup.controls).forEach(controlName => {
+        newValues[controlName] = response[controlName];
       });
 
-      this.wellnessForm.setValue(newValues, {emitEvent: false});
-    })
-  }
-
-  private getWellnessValues(date: string, form: FormGroup): any {
-    let values: any = {
-      id: date
-    }
-
-    WELLNESS_KEYS.forEach(key => {
-      values[key] = form.value[key];
+      this.formGroup.setValue(newValues, {emitEvent: false});
+      this.sendingInProgress = false;
     });
-    return values
   }
 
-  private getWellnessForm(): FormGroup {
+  private getWellnessFields(response: any) {
+    let wellnessKeys = response['icu_wellness_keys'] as Array<string>;
+    return KNOWN_WELLNESS_FIELDS.filter(elem => wellnessKeys.indexOf(elem.controlName) > -1);
+  }
+
+  private getWellnessFormGroup(wellnessFormControls: any): FormGroup {
     let wellnessFormFields: any = {
-      date: [null, Validators.required],
+      id: [null, Validators.required],
     };
-    WELLNESS_KEYS.forEach(key => {
-      wellnessFormFields[key] = null;
+    wellnessFormControls.forEach((key: any) => {
+      wellnessFormFields[key.controlName] = null;
     });
 
     return this.formBuilder.group(wellnessFormFields);
   }
 
-  private getDate(form: FormGroup) {
-    return form.value.date.format(DATE_FORMAT)
+  private parseFormValue(value: any, controlName: string) {
+    let wellnessField = this.wellnessFields.find(elem => elem.controlName === controlName);
+    if (wellnessField.type === 'number') {
+      if (value === null) {
+        value = -1;
+      } else {
+        value = (value + '').replace(',', '.');
+      }
+    }
+    return value;
+  }
+
+  private showSuccessfulIcon() {
+    this.requestSuccessful = true;
+    setTimeout(() => {
+      this.requestSuccessful = false;
+    }, 5000);
   }
 }
