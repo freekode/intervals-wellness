@@ -1,6 +1,6 @@
 <form
-  *ngIf="wellnessForm!!"
-  [formGroup]="wellnessForm"
+  *ngIf="formGroup!!"
+  [formGroup]="formGroup"
   novalidate
   (ngSubmit)="onSubmit()">
   <mat-card class="shipping-card">
@@ -24,10 +24,10 @@
           </mat-form-field>
         </div>
       </div>
-      <div class="row" *ngFor="let control of formControls">
+      <div class="row" *ngFor="let control of wellnessFields">
         <div class="col">
           <app-form-input
-            [formGroup]="wellnessForm"
+            [formGroup]="formGroup"
             [inputType]="control.type"
             [controlName]="control.controlName"
             [placeholder]="control.controlName"
@@ -39,7 +39,7 @@
       <button
         mat-raised-button
         color="primary"
-        [disabled]="wellnessForm.invalid"
+        [disabled]="formGroup.invalid"
         type="submit">
         Send
       </button>

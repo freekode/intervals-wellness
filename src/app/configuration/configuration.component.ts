@@ -4,6 +4,7 @@ import { ConfigurationService } from 'infrastructure/configuration.service';
 import { ConfigurationData } from 'infrastructure/configuration-data';
 import { Router } from '@angular/router';
 import { IntervalsClient } from 'infrastructure/intervals.client';
+import { catchError, EMPTY } from 'rxjs';
 
 
 @Component({
@@ -12,7 +13,10 @@ import { IntervalsClient } from 'infrastructure/intervals.client';
   styleUrls: ['./configuration.component.scss']
 })
 export class ConfigurationComponent implements OnInit {
-  configurationForm: FormGroup = this.getConfigurationForm();
+
+  formGroup: FormGroup = this.getConfigurationForm();
+
+  errorMessage = '';
 
   constructor(
     private router: Router,
@@ -25,7 +29,7 @@ export class ConfigurationComponent implements OnInit {
   ngOnInit(): void {
     let configuration = this.configurationService.getConfiguration();
 
-    this.configurationForm.setValue({
+    this.formGroup.setValue({
       athleteId: configuration.athleteId || null,
       apiKey: configuration.apiKey || null,
     });
@@ -33,12 +37,22 @@ export class ConfigurationComponent implements OnInit {
 
   onSubmit(): void {
     let newConfiguration = new ConfigurationData(
-      this.configurationForm.value.athleteId,
-      this.configurationForm.value.apiKey
+      this.formGroup.value.athleteId,
+      this.formGroup.value.apiKey
     );
 
     this.configurationService.setConfiguration(newConfiguration);
-    this.router.navigate(['/wellness']);
+    this.intervalsClient.test(newConfiguration.athleteId!).pipe(
+      catchError(err => {
+        if (err.status === 403) {
+          this.errorMessage = 'Wrong credentials';
+        }
+        return EMPTY;
+      })
+    ).subscribe(() => {
+      this.errorMessage = '';
+      this.router.navigate(['/wellness']);
+    });
   }
 
   private getConfigurationForm(): FormGroup {

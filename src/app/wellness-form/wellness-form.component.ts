@@ -3,12 +3,12 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IntervalsClient } from 'infrastructure/intervals.client';
 import * as moment from 'moment';
 import { ConfigurationService } from 'infrastructure/configuration.service';
-import { ConfigurationData } from '../../infrastructure/configuration-data';
+import { ConfigurationData } from 'infrastructure/configuration-data';
 
 
 const DATE_FORMAT = 'YYYY-MM-DD';
 const TODAY_DATE = moment();
-const KNOWN_FORM_CONTROLS = [
+const KNOWN_WELLNESS_FIELDS = [
   {controlName: 'weight', type: 'number'},
   {controlName: 'restingHR', type: 'number'},
   {controlName: 'hrv', type: 'number'},
@@ -23,9 +23,9 @@ const KNOWN_FORM_CONTROLS = [
 })
 export class WellnessFormComponent implements OnInit {
 
-  formControls!: Array<any>;
+  wellnessFields!: Array<any>;
 
-  wellnessForm!: FormGroup;
+  formGroup!: FormGroup;
 
   configurationData!: ConfigurationData;
 
@@ -43,19 +43,19 @@ export class WellnessFormComponent implements OnInit {
   ngOnInit(): void {
     this.configurationData = this.configurationService.getConfiguration();
     this.intervalsClient.getAthlete(this.configurationData.athleteId!).subscribe(response => {
-      this.formControls = this.getWellnessControls(response);
-      this.wellnessForm = this.getWellnessFormGroup(this.formControls);
+      this.wellnessFields = this.getWellnessFields(response);
+      this.formGroup = this.getWellnessFormGroup(this.wellnessFields);
 
       this.handleDateChange();
     });
   }
 
   onSubmit(): void {
-    if (this.wellnessForm.pristine) {
+    if (this.formGroup.pristine) {
       return;
     }
     this.sendingInProgress = true;
-    let values = this.getWellnessFormValues(this.wellnessForm);
+    let values = this.getWellnessFormValues(this.formGroup);
 
     console.log(values);
 
@@ -67,10 +67,10 @@ export class WellnessFormComponent implements OnInit {
   }
 
   private handleDateChange() {
-    this.wellnessForm.controls['id'].valueChanges.subscribe(date => {
+    this.formGroup.controls['id'].valueChanges.subscribe(date => {
       this.setWellnessFormValues(date);
     });
-    this.wellnessForm.patchValue({
+    this.formGroup.patchValue({
       id: TODAY_DATE,
     });
   }
@@ -96,18 +96,18 @@ export class WellnessFormComponent implements OnInit {
         id: response.id
       };
 
-      this.formControls.forEach((key: any) => {
+      this.wellnessFields.forEach((key: any) => {
         newValues[key.controlName] = response[key.controlName];
       });
 
-      this.wellnessForm.setValue(newValues, {emitEvent: false});
+      this.formGroup.setValue(newValues, {emitEvent: false});
       this.sendingInProgress = false;
     });
   }
 
-  private getWellnessControls(response: any) {
+  private getWellnessFields(response: any) {
     let wellnessKeys = response['icu_wellness_keys'] as Array<string>;
-    return KNOWN_FORM_CONTROLS.filter(elem => wellnessKeys.indexOf(elem.controlName) > -1);
+    return KNOWN_WELLNESS_FIELDS.filter(elem => wellnessKeys.indexOf(elem.controlName) > -1);
   }
 
   private getWellnessFormGroup(wellnessFormControls: any): FormGroup {
