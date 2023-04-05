@@ -1,15 +1,19 @@
 <mat-form-field [formGroup]="formGroup">
-    <input
-      *ngIf="inputType === 'number'"
-      matInput
-      inputmode="decimal"
-      [formControlName]="controlName"
-      [placeholder]="placeholder">
+  <mat-label>{{wellnessField.title}}</mat-label>
+  <input
+    *ngIf="wellnessField.type === 'number'"
+    matInput
+    inputmode="decimal"
+    [formControlName]="wellnessField.key">
 
-    <textarea
-      *ngIf="inputType === 'textarea'"
-      matInput
-      [formControlName]="controlName"
-      [placeholder]="placeholder"
-    ></textarea>
+  <input
+    *ngIf="wellnessField.type === 'text'"
+    matInput
+    [formControlName]="wellnessField.key">
+
+  <textarea
+    *ngIf="wellnessField.type === 'textarea'"
+    matInput
+    [formControlName]="wellnessField.key"
+  ></textarea>
 </mat-form-field>

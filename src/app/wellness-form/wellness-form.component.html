@@ -1,66 +1,47 @@
-<form
-  *ngIf="formGroup!!"
-  [formGroup]="formGroup"
-  novalidate
-  (ngSubmit)="onSubmit()">
-  <mat-card class="shipping-card">
-    <mat-card-content>
-      <div class="row">
-        <div class="col">
-          <mat-form-field appearance="fill">
-            <mat-label>Choose a date</mat-label>
-            <input
-              matInput
-              [matDatepicker]="datepicker"
-              formControlName="id">
-            <mat-datepicker-toggle
-              matIconSuffix
-              [for]="datepicker"
-            ></mat-datepicker-toggle>
-            <mat-datepicker #datepicker></mat-datepicker>
-          </mat-form-field>
-        </div>
+<div class="wellness-form">
+  <mat-form-field appearance="fill">
+    <mat-label>Choose a date</mat-label>
+    <input
+      matInput
+      [value]="selectedDate"
+      [matDatepicker]="datepicker"
+      (dateChange)="onDateChanged($event)">
+    <mat-datepicker-toggle matIconSuffix [for]="datepicker"></mat-datepicker-toggle>
+    <mat-datepicker #datepicker></mat-datepicker>
+  </mat-form-field>
+  <div>
+    <form
+      *ngIf="formGroup!!"
+      [formGroup]="formGroup"
+      novalidate
+      (ngSubmit)="onSubmit()">
+      <div *ngFor="let field of wellnessFields">
+        <app-form-input
+          [formGroup]="formGroup"
+          [wellnessField]="field"
+        ></app-form-input>
       </div>
-      <div class="row" *ngFor="let control of wellnessFields">
-        <div class="col">
-          <app-form-input
-            [formGroup]="formGroup"
-            [inputType]="control.type"
-            [controlName]="control.controlName"
-            [placeholder]="control.controlName"
-          ></app-form-input>
-        </div>
+      <div class="action-section">
+        <button
+          *ngIf="!requestInProgress"
+          mat-raised-button
+          [disabled]="formGroup.invalid"
+          type="submit"
+          color="primary"
+          [class.successful-button]="requestSuccessful"
+          [class.error-button]="requestError"
+          class="submit-button">
+          Send
+        </button>
       </div>
-    </mat-card-content>
-    <mat-card-actions>
-      <button
-        mat-raised-button
-        [disabled]="formGroup.invalid"
-        type="submit"
-        color="primary"
-        class="submit-button"
-      >
-        Send
-      </button>
-      <div class="status-section">
-        <mat-spinner
-          *ngIf="sendingInProgress"
-          [diameter]="30"
-          class="spinner"
-        ></mat-spinner>
-        <mat-icon
-          class="successful-icon"
-          [class.puff-out-center]="requestSuccessful"
-        >
-          check_circle
-        </mat-icon>
-        <mat-icon
-          class="error-icon"
-          [class.puff-out-center]="requestError"
-        >
-          error
-        </mat-icon>
-      </div>
-    </mat-card-actions>
-  </mat-card>
-</form>
+    </form>
+
+    <div class="status-section">
+      <div class="error-message">{{errorMessage}}</div>
+      <mat-spinner
+        *ngIf="requestInProgress"
+        [diameter]="70"
+        class="spinner"></mat-spinner>
+    </div>
+  </div>
+</div>

@@ -1,37 +1,32 @@
-.full-width {
-  width: 100%;
+.wellness-form {
+  margin: 10px;
 }
 
-.row {
-  display: flex;
-  flex-direction: row;
-}
+.action-section {
 
-.col {
-  flex: 1;
-}
+  .submit-button {
+    height: 70px;
+    width: 100%;
+    margin-bottom: 10px;
+  }
 
-.submit-button{
-  height: 70px;
-  width: 70px;
+  .successful-button {
+    background-color: green;
+  }
+
+  .error-button {
+    background-color: red;
+  }
 }
 
 .status-section {
-  margin-left: 10px;
-
   .spinner {
     display: inline-flex;
     visibility: visible;
   }
 
-  .successful-icon {
-    color: green;
-    visibility: hidden;
-  }
-
-  .error-icon {
+  .error-message {
     color: red;
-    visibility: hidden;
   }
 }
 
