@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+import { WellnessField } from '../WellnessField';
 
 @Component({
   selector: 'app-form-input',
@@ -11,11 +12,6 @@ export class FormInputComponent {
   formGroup!: FormGroup
 
   @Input()
-  inputType!: string
+  wellnessField!: WellnessField
 
-  @Input()
-  controlName!: string
-
-  @Input()
-  placeholder: string = this.controlName
 }

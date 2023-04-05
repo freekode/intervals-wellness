@@ -1,20 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { IntervalsClient } from 'infrastructure/intervals.client';
 import * as moment from 'moment';
 import { ConfigurationService } from 'infrastructure/configuration.service';
 import { ConfigurationData } from 'infrastructure/configuration-data';
+import { WellnessField } from './WellnessField';
+import { WellnessFieldService } from './wellness-field.service';
+import { catchError, EMPTY } from 'rxjs';
 
 
 const DATE_FORMAT = 'YYYY-MM-DD';
-const TODAY_DATE = moment();
-const KNOWN_WELLNESS_FIELDS = [
-  {controlName: 'weight', type: 'number'},
-  {controlName: 'restingHR', type: 'number'},
-  {controlName: 'hrv', type: 'number'},
-  {controlName: 'hrvSDNN', type: 'number'},
-  {controlName: 'comments', type: 'textarea'}
-];
 
 @Component({
   selector: 'app-wellness-form',
@@ -23,30 +18,46 @@ const KNOWN_WELLNESS_FIELDS = [
 })
 export class WellnessFormComponent implements OnInit {
 
-  wellnessFields!: Array<any>;
+  wellnessFields!: WellnessField[];
+  unsupportedWellnessFields!: WellnessField[];
 
   formGroup!: FormGroup;
 
   configurationData!: ConfigurationData;
 
-  sendingInProgress = false;
+  selectedDate: any = moment();
+
+  requestInProgress = false;
   requestSuccessful = false;
   requestError = false;
+  errorMessage: string = '';
 
   constructor(
     private formBuilder: FormBuilder,
     private intervalsClient: IntervalsClient,
-    private configurationService: ConfigurationService
+    private configurationService: ConfigurationService,
   ) {
   }
 
   ngOnInit(): void {
+    this.requestInProgress = true;
     this.configurationData = this.configurationService.getConfiguration();
-    this.intervalsClient.getAthlete(this.configurationData.athleteId!).subscribe(response => {
-      this.wellnessFields = this.getWellnessFields(response);
-      this.formGroup = this.getWellnessFormGroup(this.wellnessFields);
-
-      this.handleDateChange();
+    this.intervalsClient.getAthlete(this.configurationData.athleteId!).pipe(
+      catchError(err => {
+        this.errorMessage = err.error.error;
+        return EMPTY;
+      })
+    ).subscribe({
+      next: response => {
+        const wellnessFieldService = new WellnessFieldService(response['icu_wellness_keys']);
+        this.wellnessFields = wellnessFieldService.supportedFields;
+        this.unsupportedWellnessFields = wellnessFieldService.unsupportedFields;
+        this.formGroup = this.getWellnessFormGroup(this.wellnessFields);
+        this.setWellnessFormValues(this.selectedDate);
+      },
+      complete: () => {
+        this.requestInProgress = false;
+      }
     });
   }
 
@@ -54,30 +65,40 @@ export class WellnessFormComponent implements OnInit {
     if (this.formGroup.pristine) {
       return;
     }
-    this.sendingInProgress = true;
+    this.requestInProgress = true;
+    this.errorMessage = '';
     let values = this.getWellnessFormValues(this.formGroup);
 
     console.log(values);
 
-    this.intervalsClient.updateWellness(this.configurationData.athleteId!, values.id, values).subscribe(() => {
-      console.log('done');
-      this.sendingInProgress = false;
-      this.showSuccessfulIcon();
+    this.intervalsClient.updateWellness(this.configurationData.athleteId!, values.id, values).pipe(
+      catchError(err => {
+        if (err.status === 422) {
+          this.showErrorIcon();
+          this.errorMessage = err.error.error;
+        }
+        return EMPTY;
+      })
+    ).subscribe({
+      next: response => {
+        console.log('done');
+        this.fillWellnessForm(response);
+        this.showSuccessfulIcon();
+      },
+      complete: () => {
+        this.requestInProgress = false;
+      }
     });
   }
 
-  private handleDateChange() {
-    this.formGroup.controls['id'].valueChanges.subscribe(date => {
-      this.setWellnessFormValues(date);
-    });
-    this.formGroup.patchValue({
-      id: TODAY_DATE,
-    });
+  onDateChanged($event: any) {
+    this.selectedDate = $event.value;
+    this.setWellnessFormValues($event.value);
   }
 
   private getWellnessFormValues(form: FormGroup): any {
     let values: any = {
-      id: form.controls['id'].value
+      id: this.selectedDate.format(DATE_FORMAT)
     };
 
     Object.keys(form.controls).forEach(controlName => {
@@ -90,41 +111,33 @@ export class WellnessFormComponent implements OnInit {
   }
 
   private setWellnessFormValues(date: any) {
-    this.sendingInProgress = true;
     this.intervalsClient.getWellness(this.configurationData.athleteId!, date.format(DATE_FORMAT)).subscribe((response) => {
-      let newValues: any = {
-        id: response.id
-      };
-
-      Object.keys(this.formGroup.controls).forEach(controlName => {
-        newValues[controlName] = response[controlName];
-      });
-
-      this.formGroup.setValue(newValues, {emitEvent: false});
-      this.sendingInProgress = false;
+      this.fillWellnessForm(response);
     });
   }
 
-  private getWellnessFields(response: any) {
-    let wellnessKeys = response['icu_wellness_keys'] as Array<string>;
-    return KNOWN_WELLNESS_FIELDS.filter(elem => wellnessKeys.indexOf(elem.controlName) > -1);
+  private fillWellnessForm(data: any) {
+    let newValues: any = {};
+    Object.keys(this.formGroup.controls).forEach(controlName => {
+      newValues[controlName] = data[controlName];
+    });
+
+    this.formGroup.reset(newValues, {emitEvent: false});
   }
 
-  private getWellnessFormGroup(wellnessFormControls: any): FormGroup {
-    let wellnessFormFields: any = {
-      id: [null, Validators.required],
-    };
-    wellnessFormControls.forEach((key: any) => {
-      wellnessFormFields[key.controlName] = null;
+  private getWellnessFormGroup(wellnessFormControls: WellnessField[]): FormGroup {
+    let wellnessFormFields: any = {};
+    wellnessFormControls.forEach((field: any) => {
+      wellnessFormFields[field.key] = [null, field.validators];
     });
 
     return this.formBuilder.group(wellnessFormFields);
   }
 
   private parseFormValue(value: any, controlName: string) {
-    let wellnessField = this.wellnessFields.find(elem => elem.controlName === controlName);
-    if (wellnessField.type === 'number') {
-      if (value === null) {
+    let wellnessField = this.wellnessFields.find(elem => elem.key === controlName);
+    if (wellnessField!.type === 'number') {
+      if (!value) {
         value = -1;
       } else {
         value = (value + '').replace(',', '.');
@@ -139,4 +152,12 @@ export class WellnessFormComponent implements OnInit {
       this.requestSuccessful = false;
     }, 5000);
   }
+
+  private showErrorIcon() {
+    this.requestError = true;
+    setTimeout(() => {
+      this.requestError = false;
+    }, 5000);
+  }
+
 }
