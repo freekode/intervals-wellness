@@ -1,6 +1,26 @@
 # intervals-wellness
 
-Small form for easier wellness form on Intervals.icu platform
+Simple form for easier wellness input for [Intervals](https://intervals.icu/) platform
+
+## How to run
+
+### Angular CLI
+
+Usual angular command:
+```
+ng serve
+```
+
+### Docker
+
+Docker image is available. There is example of [docker-compose.yml](https://github.com/freekode/intervals-wellness/blob/main/docker-compose.yml)
+
+Copy `docker-compose.yml` file to your directory. Then run:
+```
+docker-compose up -d
+```
+
+
 
 ## TODO
 
